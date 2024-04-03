@@ -1,31 +1,23 @@
 #cloud-config
 
-# パッケージのアップデートとアップグレードを行います
 package_update: true
 package_upgrade: true
 
-# 必要なパッケージをインストールします
 packages:
   - apt-transport-https
   - ca-certificates
   - curl
   - software-properties-common
 
-# Dockerをインストールするためのコマンドを実行します
 runcmd:
-  # Dockerの公式GPGキーを追加します
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
   
-  # Dockerのリポジトリを追加します
   - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-  
-  # パッケージインデックスを更新し、Dockerをインストールします
+
   - apt-get update
   - apt-get install -y docker-ce docker-ce-cli containerd.io
-  
-  # 現在のユーザーをdockerグループに追加します
+
   - usermod -aG docker $USER
   
-  # Dockerを起動し、システム起動時に自動で起動するように設定します
   - systemctl start docker
   - systemctl enable docker
