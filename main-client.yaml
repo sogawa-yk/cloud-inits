@@ -1,0 +1,37 @@
+#cloud-config
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - software-properties-common
+  - git
+  - fish
+
+runcmd:
+  # Install Docker
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  - apt-get update
+  - apt-get install -y docker-ce
+  - usermod -aG docker ubuntu
+
+  # Install kubectl
+  - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+  - install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+  # Install Helm
+  - curl https://baltocdn.com/helm/signing.asc | sudo apt-key add -
+  - apt-get install -y apt-transport-https --no-install-recommends
+  - echo "deb https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+  - apt-get update
+  - apt-get install -y helm
+
+  # Set default shell to fish for ubuntu user
+  - chsh -s /usr/bin/fish ubuntu
+
+  # Install Fisher (fish plugin manager)
+  - curl -sL https://git.io/fisher | source && fish -c 'fisher install jorgebucaran/fisher'
