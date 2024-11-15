@@ -1,0 +1,24 @@
+#cloud-config
+package_update: true
+package_upgrade: true
+
+write_files:
+  - path: /etc/modules-load.d/br_netfilter.conf
+    content: |
+      br_netfilter
+
+runcmd:
+  # Swap を無効化
+  - sudo swapoff -a
+  - sudo cp /etc/fstab /etc/fstab_copy
+  - sudo sed -i '/\bswap\b/s/^/#/' /etc/fstab
+
+  # br_netfilter の設定
+  - sudo modprobe br_netfilter
+  - sudo sh -c 'echo "br_netfilter" > /etc/modules-load.d/br_netfilter.conf'
+
+  # ファイアウォール設定
+  - sudo firewall-cmd --add-port=8091/tcp --permanent
+
+  # firewalld の再起動
+  - sudo systemctl restart firewalld.service
